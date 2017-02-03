@@ -44,7 +44,6 @@
 (require 'screen-lines)
 (require 'moinmoin-mode)
 (require 'request)
-(require 'helm)
 
 (defvar moomin-basic-auth-user nil)
 (defvar moomin-basic-auth-password nil)
@@ -315,40 +314,50 @@
                (goto-char (point-min))
                (delete-trailing-whitespace)))))
 
-(defvar helm-source-moomin-page
-      '((name . "MoinMoin Wiki Page List")
-        (init . (lambda ()
-                  (with-current-buffer (helm-candidate-buffer "MoinMoin Wiki Pages")
-                    (moomin-get-page-list))))
-        (candidates-in-buffer)
-        (action
-         . (("Edit with emacs" . moomin-get-page)
-            ("Open in browser" . moomin-browse-url)))))
-
-(defvar helm-source-moomin-history
-      '((name . "MoinMoin Wiki Page History")
-        (init . (lambda ()
-                  (with-current-buffer (helm-candidate-buffer "MoinMoin Wiki History")
-                    (when (file-exists-p moomin-history-file)
-                      (insert-file-contents moomin-history-file)))))
-        (candidates-in-buffer)
-        (action
-         . (("Edit with emacs" . moomin-get-page)
-            ("Open in browser" . moomin-browse-url)
-            ("Delete from history" . moomin-delete-from-history)))))
-
-(defvar helm-source-moomin-not-found
-  `((name . "Create New Wiki Page")
-    (dummy)
-    (action . (("Edit with emacs" . moomin-get-page)))))
-
 (defun moomin-create-new-page (page)
   (interactive "sNewPage: ")
   (moomin-get-page page))
 
-(defun helm-moomin ()
+(defun moomin-edit-page ()
   (interactive)
-  (helm '(helm-source-moomin-history helm-source-moomin-page helm-source-moomin-not-found)))
+  (moomin-get-page (completing-read "Test: " (with-temp-buffer
+                                               (moomin-get-page-list)
+                                               (split-string (buffer-string) "\n" t))
+                                    )))
+
+(when (locate-library "helm")
+  (require 'helm)
+  (defvar helm-source-moomin-page
+    '((name . "MoinMoin Wiki Page List")
+      (init . (lambda ()
+                (with-current-buffer (helm-candidate-buffer "MoinMoin Wiki Pages")
+                  (moomin-get-page-list))))
+      (candidates-in-buffer)
+      (action
+       . (("Edit with emacs" . moomin-get-page)
+          ("Open in browser" . moomin-browse-url)))))
+
+  (defvar helm-source-moomin-history
+    '((name . "MoinMoin Wiki Page History")
+      (init . (lambda ()
+                (with-current-buffer (helm-candidate-buffer "MoinMoin Wiki History")
+                  (when (file-exists-p moomin-history-file)
+                    (insert-file-contents moomin-history-file)))))
+      (candidates-in-buffer)
+      (action
+       . (("Edit with emacs" . moomin-get-page)
+          ("Open in browser" . moomin-browse-url)
+          ("Delete from history" . moomin-delete-from-history)))))
+
+  (defvar helm-source-moomin-not-found
+    `((name . "Create New Wiki Page")
+      (dummy)
+      (action . (("Edit with emacs" . moomin-get-page)))))
+
+  (defun helm-moomin ()
+    (interactive)
+    (helm '(helm-source-moomin-history helm-source-moomin-page helm-source-moomin-not-found)))
+  )
 
 (add-hook 'moinmoin-mode 'moomin-moinmoin-mode-hook-function)
 
