@@ -359,6 +359,37 @@
     (helm '(helm-source-moomin-history helm-source-moomin-page helm-source-moomin-not-found)))
   )
 
+(when (locate-library "counsel")
+  (defvar counsel-moomin-history nil
+    "History for `counsel-moomin'.")
+
+  (defvar counsel-moomin-page-list-cache nil
+    "")
+
+  (defun counsel-moomin-get-page-list ()
+    (unless (and counsel-moomin-page-list-cache (not ivy-current-prefix-arg))
+      (with-temp-buffer
+        (moomin-get-page-list)
+        (setq counsel-moomin-page-list-cache (split-string (buffer-string) "\n" t))
+        ))
+    counsel-moomin-page-list-cache
+    )
+
+  (ivy-set-actions 'counsel-moomin
+                   '(("b" moomin-browse-url "Open in browser")
+                     ("n" moomin-create-new-page "Create new page")
+                     ))
+
+  (defun counsel-moomin ()
+    (interactive)
+    (ivy-read "Moomin: " (counsel-moomin-get-page-list)
+                         ;;(append (delete-dups counsel-moomin-history) (counsel-moomin-get-page-list))
+              :action #'moomin-get-page
+              :history 'counsel-moomin-history
+              :sort 'sort
+              ))
+  )
+
 (add-hook 'moinmoin-mode 'moomin-moinmoin-mode-hook-function)
 
 (provide 'moomin)
