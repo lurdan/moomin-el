@@ -314,16 +314,17 @@
                (goto-char (point-min))
                (delete-trailing-whitespace)))))
 
+;;;###autoload
 (defun moomin-create-new-page (page)
   (interactive "sNewPage: ")
   (moomin-get-page page))
 
+;;;###autoload
 (defun moomin-edit-page ()
   (interactive)
-  (moomin-get-page (completing-read "Test: " (with-temp-buffer
+  (moomin-get-page (completing-read "EditPage: " (with-temp-buffer
                                                (moomin-get-page-list)
-                                               (split-string (buffer-string) "\n" t))
-                                    )))
+                                               (split-string (buffer-string) "\n" t)))))
 
 (when (locate-library "helm")
   (require 'helm)
@@ -354,6 +355,7 @@
       (dummy)
       (action . (("Edit with emacs" . moomin-get-page)))))
 
+;;;###autoload
   (defun helm-moomin ()
     (interactive)
     (helm '(helm-source-moomin-history helm-source-moomin-page helm-source-moomin-not-found)))
@@ -380,6 +382,7 @@
                      ("n" moomin-create-new-page "Create new page")
                      ))
 
+;;;###autoload
   (defun counsel-moomin ()
     (interactive)
     (ivy-read "Moomin: " (counsel-moomin-get-page-list)
