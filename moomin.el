@@ -95,7 +95,7 @@
   (cond ((and moomin-basic-auth-user moomin-basic-auth-password)
          `(("Authorization" . ,(moomin-basic-auth-header))
            ("User-Agent" . "emacs-request")))
-        (t '((("User-Agent" . "emacs-request"))))))
+        (t '(("User-Agent" . "emacs-request")))))
 
 (defun moomin-make-local-variables (page rev ticket)
   (set (make-local-variable 'moomin-current-buffer-page-name) page)
